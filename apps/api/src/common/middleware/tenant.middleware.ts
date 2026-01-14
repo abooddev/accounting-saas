@@ -16,13 +16,21 @@ export class TenantMiddleware implements NestMiddleware {
 
     let slug: string | undefined;
 
-    if (host.includes(tenantDomain)) {
-      const subdomain = host.split('.')[0];
+    // Check for subdomain (e.g., demo.localhost or demo.myapp.com)
+    const hostWithoutPort = host.split(':')[0];
+    const hostParts = hostWithoutPort.split('.');
+
+    // Only extract subdomain if host has more parts than the tenant domain
+    // e.g., demo.localhost has 2 parts, localhost has 1 part
+    const domainParts = tenantDomain.split('.');
+    if (hostParts.length > domainParts.length) {
+      const subdomain = hostParts[0];
       if (subdomain && subdomain !== 'www' && subdomain !== 'api') {
         slug = subdomain;
       }
     }
 
+    // Fallback to X-Tenant-Slug header
     if (!slug) {
       slug = req.headers['x-tenant-slug'] as string;
     }

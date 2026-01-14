@@ -16,6 +16,8 @@ interface POSLayoutProps {
   onSaleComplete?: (sale: any) => Promise<void>;
   onPrint?: (receiptData: any) => Promise<void>;
   onOpenCashDrawer?: () => Promise<void>;
+  onSessionOpen?: (params: { terminalId: string; terminalCode: string; openingCashUSD: number; openingCashLBP: number }) => Promise<any>;
+  onSessionClose?: (sessionId: string, params: { closingCashUSD: number; closingCashLBP: number }) => Promise<any>;
   isOnline?: boolean;
   cashierId: string;
   cashierName: string;
@@ -25,6 +27,8 @@ export function POSLayout({
   onSaleComplete,
   onPrint,
   onOpenCashDrawer,
+  onSessionOpen,
+  onSessionClose,
   isOnline = true,
   cashierId,
   cashierName,
@@ -108,19 +112,47 @@ export function POSLayout({
   );
 
   const handleOpenSession = useCallback(
-    (params: { cashierId: string; cashierName: string; openingCashUSD: number; openingCashLBP: number }) => {
-      openSession(params);
-      setShowSession(false);
+    async (params: { cashierId: string; cashierName: string; openingCashUSD: number; openingCashLBP: number }) => {
+      try {
+        if (onSessionOpen) {
+          // Use API to open session
+          const terminal = useSessionStore.getState().terminal;
+          if (!terminal) throw new Error('Terminal not configured');
+
+          await onSessionOpen({
+            terminalId: terminal.id,
+            terminalCode: terminal.code,
+            openingCashUSD: params.openingCashUSD,
+            openingCashLBP: params.openingCashLBP,
+          });
+        } else {
+          // Use local store
+          openSession(params);
+        }
+        setShowSession(false);
+      } catch (error) {
+        console.error('Failed to open session:', error);
+        playSound('error');
+      }
     },
-    [openSession]
+    [openSession, onSessionOpen]
   );
 
   const handleCloseSession = useCallback(
-    (params: { closingCashUSD: number; closingCashLBP: number }) => {
-      closeSession(params);
-      setShowSession(true);
+    async (params: { closingCashUSD: number; closingCashLBP: number }) => {
+      try {
+        if (onSessionClose && session) {
+          await onSessionClose(session.id, params);
+        } else {
+          closeSession(params);
+        }
+        setShowSession(true);
+      } catch (error) {
+        console.error('Failed to close session:', error);
+        playSound('error');
+      }
     },
-    [closeSession]
+    [closeSession, onSessionClose, session]
   );
 
   return (

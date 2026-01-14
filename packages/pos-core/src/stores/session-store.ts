@@ -7,6 +7,7 @@ interface SessionState {
   terminal: POSTerminal | null;
 
   setTerminal: (terminal: POSTerminal) => void;
+  setSession: (session: POSSession | null) => void;
 
   openSession: (params: {
     cashierId: string;
@@ -34,6 +35,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   setTerminal: (terminal) => {
     set({ terminal });
+  },
+
+  setSession: (session) => {
+    set({ session });
   },
 
   openSession: ({ cashierId, cashierName, openingCashUSD, openingCashLBP }) => {

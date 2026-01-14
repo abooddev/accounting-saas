@@ -1,9 +1,14 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as bcrypt from 'bcrypt';
+import { sql } from 'drizzle-orm';
 import * as schema from './schema';
+import { config } from 'dotenv';
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/accounting_dev';
+// Load .env file
+config();
+
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/accounting_dev';
 
 async function seed() {
   console.log('🌱 Starting database seed...');
@@ -12,6 +17,10 @@ async function seed() {
   const db = drizzle(client, { schema });
 
   try {
+    // Clear existing data (in correct order due to foreign keys)
+    console.log('Clearing existing data...');
+    await db.execute(sql`TRUNCATE TABLE exchange_rates, account_movements, payments, invoice_items, invoices, products, categories, contacts, money_accounts, refresh_tokens, users, tenants CASCADE`);
+
     // Create demo tenant
     console.log('Creating demo tenant...');
     const [tenant] = await db.insert(schema.tenants).values({

@@ -1,6 +1,5 @@
 'use client';
 
-import { use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useInvoice, useConfirmInvoice, useCancelInvoice } from '@/hooks/use-invoices';
@@ -23,8 +22,8 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, CheckCircle, XCircle, CreditCard } from 'lucide-react';
 import { formatMoney, INVOICE_STATUSES } from '@accounting/shared';
 
-export default function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const { data: invoice, isLoading } = useInvoice(id);
   const confirmMutation = useConfirmInvoice();

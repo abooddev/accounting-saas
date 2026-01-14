@@ -13,6 +13,7 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { PosModule } from './modules/pos/pos.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import configuration from './config/configuration';
 
@@ -35,6 +36,7 @@ import configuration from './config/configuration';
     PaymentsModule,
     DashboardModule,
     ReportsModule,
+    PosModule,
   ],
 })
 export class AppModule implements NestModule {

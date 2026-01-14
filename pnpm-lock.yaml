@@ -47,6 +47,9 @@ importers:
       class-validator:
         specifier: ^0.14.1
         version: 0.14.3
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       drizzle-orm:
         specifier: ^0.38.3
         version: 0.38.4(@types/pg@8.16.0)(@types/react@18.3.27)(pg@8.17.0)(postgres@3.4.8)(react@18.3.1)
@@ -2057,6 +2060,10 @@ packages:
 
   dotenv@16.4.5:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
+    engines: {node: '>=12'}
+
+  dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
     engines: {node: '>=12'}
 
   drizzle-kit@0.30.6:
@@ -5379,6 +5386,8 @@ snapshots:
   dotenv-expand@10.0.0: {}
 
   dotenv@16.4.5: {}
+
+  dotenv@17.2.3: {}
 
   drizzle-kit@0.30.6:
     dependencies:

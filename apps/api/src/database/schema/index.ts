@@ -10,3 +10,5 @@ export * from './invoices';
 export * from './payments';
 export * from './account-movements';
 export * from './sequences';
+export * from './pos-sessions';
+export * from './pos-sales';

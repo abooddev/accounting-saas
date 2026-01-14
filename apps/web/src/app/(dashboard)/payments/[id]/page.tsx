@@ -1,6 +1,5 @@
 'use client';
 
-import { use } from 'react';
 import Link from 'next/link';
 import { usePayment } from '@/hooks/use-payments';
 import { Button } from '@/components/ui/button';
@@ -14,8 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { formatMoney, PAYMENT_METHODS } from '@accounting/shared';
 
-export default function PaymentDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function PaymentDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { data: payment, isLoading } = usePayment(id);
 
   if (isLoading) {

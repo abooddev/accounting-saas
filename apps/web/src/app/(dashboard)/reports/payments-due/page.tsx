@@ -39,7 +39,7 @@ export default function PaymentsDuePage() {
 
       {isLoading ? (
         <div className="text-center py-8">Loading...</div>
-      ) : report ? (
+      ) : report && report.totals ? (
         <div className="space-y-6">
           {/* Summary Cards */}
           <div className="grid gap-4 md:grid-cols-4">
