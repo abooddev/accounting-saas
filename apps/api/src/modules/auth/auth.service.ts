@@ -15,6 +15,7 @@ import * as schema from '../../database/schema';
 import { refreshTokens } from '../../database/schema';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
+import { AccountsService } from '../accounts/accounts.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthTokens, AuthResponse } from '../../types';
@@ -27,6 +28,7 @@ export class AuthService {
     private configService: ConfigService,
     private tenantsService: TenantsService,
     private usersService: UsersService,
+    private accountsService: AccountsService,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
@@ -39,6 +41,9 @@ export class AuthService {
       name: dto.businessName,
       slug: dto.businessSlug,
     });
+
+    // Create default money accounts for the new tenant
+    await this.accountsService.createDefaultAccounts(tenant.id);
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 

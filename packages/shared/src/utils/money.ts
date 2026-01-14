@@ -2,14 +2,15 @@ import { CURRENCIES, CurrencyCode, DEFAULT_EXCHANGE_RATE } from '../constants/cu
 
 export function formatMoney(
   amount: number,
-  currency: CurrencyCode = 'USD',
+  currency: string = 'USD',
   locale: string = 'en-US'
 ): string {
-  const currencyInfo = CURRENCIES[currency];
+  const currencyCode = (currency === 'USD' || currency === 'LBP') ? currency : 'USD';
+  const currencyInfo = CURRENCIES[currencyCode];
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: currency,
+    currency: currencyCode,
     minimumFractionDigits: currencyInfo.decimals,
     maximumFractionDigits: currencyInfo.decimals,
   }).format(amount);

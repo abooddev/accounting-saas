@@ -9,6 +9,11 @@ import {
   FolderTree,
   Settings,
   LogOut,
+  Wallet,
+  FileText,
+  CreditCard,
+  BarChart3,
+  ShoppingCart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
@@ -17,9 +22,34 @@ import { Separator } from '@/components/ui/separator';
 
 const navItems = [
   {
+    title: 'POS',
+    href: '/pos',
+    icon: ShoppingCart,
+  },
+  {
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    title: 'Accounts',
+    href: '/accounts',
+    icon: Wallet,
+  },
+  {
+    title: 'Invoices',
+    href: '/invoices',
+    icon: FileText,
+  },
+  {
+    title: 'Payments',
+    href: '/payments',
+    icon: CreditCard,
+  },
+  {
+    title: 'Reports',
+    href: '/reports',
+    icon: BarChart3,
   },
   {
     title: 'Contacts',
