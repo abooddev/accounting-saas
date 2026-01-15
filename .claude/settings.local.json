@@ -15,7 +15,23 @@
       "Bash(SESSION_ID=\"b7db6a40-c151-417c-9874-8c2c048c505f\":*)",
       "Bash(PRODUCT_ID=\"08867036-2ff3-4b5c-8fe3-40a7a9ae5d82\":*)",
       "Bash(__NEW_LINE_358ba2defa94ef00__ curl -s -X POST http://localhost:3001/api/pos/sales -H \"Content-Type: application/json\" -H \"X-Tenant-Slug: demo-minimarket\" -H \"Authorization: Bearer $TOKEN\" -d '{\n    \"\"sessionId\"\": \"\"'$SESSION_ID'\"\",\n    \"\"items\"\": [{\n      \"\"productId\"\": \"\"'$PRODUCT_ID'\"\",\n      \"\"barcode\"\": \"\"5449000000996\"\",\n      \"\"productName\"\": \"\"Coca-Cola 330ml\"\",\n      \"\"quantity\"\": 2,\n      \"\"unitPrice\"\": 0.50,\n      \"\"discountPercent\"\": 0,\n      \"\"lineTotal\"\": 1.00\n    }],\n    \"\"subtotal\"\": 1.00,\n    \"\"discountPercent\"\": 0,\n    \"\"discountAmount\"\": 0,\n    \"\"taxRate\"\": 0,\n    \"\"taxAmount\"\": 0,\n    \"\"total\"\": 1.00,\n    \"\"currency\"\": \"\"USD\"\",\n    \"\"exchangeRate\"\": 89500,\n    \"\"totalLBP\"\": 89500,\n    \"\"payment\"\": {\n      \"\"method\"\": \"\"cash_usd\"\",\n      \"\"amountUSD\"\": 1.00,\n      \"\"amountLBP\"\": 0,\n      \"\"cashReceivedUSD\"\": 5.00,\n      \"\"cashReceivedLBP\"\": 0,\n      \"\"changeUSD\"\": 4.00,\n      \"\"changeLBP\"\": 0\n    }\n  }')",
-      "Bash(__NEW_LINE_51f1969d3ddc7d6d__ curl -s -X POST http://localhost:3001/api/pos/sessions/$SESSION_ID/close -H \"Content-Type: application/json\" -H \"X-Tenant-Slug: demo-minimarket\" -H \"Authorization: Bearer $TOKEN\" -d '{\"\"closingCashUSD\"\": 101.00, \"\"closingCashLBP\"\": 5000000}')"
+      "Bash(__NEW_LINE_51f1969d3ddc7d6d__ curl -s -X POST http://localhost:3001/api/pos/sessions/$SESSION_ID/close -H \"Content-Type: application/json\" -H \"X-Tenant-Slug: demo-minimarket\" -H \"Authorization: Bearer $TOKEN\" -d '{\"\"closingCashUSD\"\": 101.00, \"\"closingCashLBP\"\": 5000000}')",
+      "Bash(pnpm --filter @accounting/pos-core build:*)",
+      "Bash(pnpm --filter api db:push:*)",
+      "Bash(pnpm drizzle-kit push:*)",
+      "Bash(npx drizzle-kit push:*)",
+      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(pnpm dev)",
+      "Skill(frontend-design)",
+      "Bash(pnpm run dev)",
+      "Bash(pnpm run clean)",
+      "Bash(pnpm run build:*)",
+      "Bash(ls:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(fuser:*)",
+      "Bash(pnpm tsc:*)"
     ]
   }
 }

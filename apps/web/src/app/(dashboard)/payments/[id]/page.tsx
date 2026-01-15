@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import Link from 'next/link';
 import { usePayment } from '@/hooks/use-payments';
 import { Button } from '@/components/ui/button';
@@ -10,12 +11,21 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { formatMoney, PAYMENT_METHODS } from '@accounting/shared';
+import { PaymentReceiptPDF } from '@/components/pdf';
+import { usePDFDownload } from '@/components/pdf/usePDFDownload';
 
-export default function PaymentDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function PaymentDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { data: payment, isLoading } = usePayment(id);
+  const { downloadPDF, isGenerating } = usePDFDownload();
+
+  const handleDownloadReceipt = async () => {
+    if (!payment) return;
+    const filename = `receipt-${payment.paymentNumber}.pdf`;
+    await downloadPDF(<PaymentReceiptPDF payment={payment} />, filename);
+  };
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-64">Loading...</div>;
@@ -41,16 +51,31 @@ export default function PaymentDetailPage({ params }: { params: { id: string } }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/payments">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold">{payment.paymentNumber}</h1>
-          <p className="text-muted-foreground">{getTypeLabel(payment.type)}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/payments">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">{payment.paymentNumber}</h1>
+            <p className="text-muted-foreground">{getTypeLabel(payment.type)}</p>
+          </div>
         </div>
+        <Button variant="outline" onClick={handleDownloadReceipt} disabled={isGenerating}>
+          {isGenerating ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4 mr-2" />
+              Download Receipt
+            </>
+          )}
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-6">

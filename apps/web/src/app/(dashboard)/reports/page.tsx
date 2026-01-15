@@ -10,6 +10,8 @@ import {
   DollarSign,
   Package,
   ArrowRight,
+  Scale,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 const reports = [
@@ -54,6 +56,20 @@ const reports = [
     href: '/reports/inventory',
     icon: Package,
     color: 'text-indigo-600',
+  },
+  {
+    title: 'Balance Sheet',
+    description: 'Financial position showing assets, liabilities, and equity',
+    href: '/reports/balance-sheet',
+    icon: FileSpreadsheet,
+    color: 'text-cyan-600',
+  },
+  {
+    title: 'Trial Balance',
+    description: 'All accounts with debit and credit balances',
+    href: '/reports/trial-balance',
+    icon: Scale,
+    color: 'text-amber-600',
   },
 ];
 

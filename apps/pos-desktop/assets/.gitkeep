@@ -1,0 +1,10 @@
+# This directory contains application icons
+# Required files for packaging:
+# - icon.png (256x256 or larger, used as source)
+# - icon.ico (Windows)
+# - icon.icns (macOS)
+# - icons/ directory with various sizes for Linux (16x16, 32x32, 48x48, 64x64, 128x128, 256x256)
+#
+# To generate icons from a PNG source, you can use:
+# - electron-icon-maker (npm package)
+# - https://www.electronjs.org/docs/latest/tutorial/application-distribution

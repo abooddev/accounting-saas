@@ -14,6 +14,13 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { PosModule } from './modules/pos/pos.module';
+import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.module';
+import { SalesOrdersModule } from './modules/sales-orders/sales-orders.module';
+import { PriceListsModule } from './modules/price-lists/price-lists.module';
+import { CreditNotesModule } from './modules/credit-notes/credit-notes.module';
+import { QuotesModule } from './modules/quotes/quotes.module';
+import { UploadModule } from './modules/upload/upload.module';
+import { OcrModule } from './modules/ocr/ocr.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import configuration from './config/configuration';
 
@@ -37,6 +44,13 @@ import configuration from './config/configuration';
     DashboardModule,
     ReportsModule,
     PosModule,
+    PurchaseOrdersModule,
+    SalesOrdersModule,
+    PriceListsModule,
+    CreditNotesModule,
+    QuotesModule,
+    UploadModule,
+    OcrModule,
   ],
 })
 export class AppModule implements NestModule {

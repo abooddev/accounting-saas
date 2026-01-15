@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Minus, Download } from 'lucide-react';
+import { exportProfitLossToExcel } from '@/lib/excel';
 
 export default function ProfitLossPage() {
   const defaultRange = getDateRange('this_month');
@@ -46,6 +47,15 @@ export default function ProfitLossPage() {
             </p>
           </div>
         </div>
+        {report && (
+          <Button
+            variant="outline"
+            onClick={() => exportProfitLossToExcel(report)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export to Excel
+          </Button>
+        )}
       </div>
 
       <DateRangePicker

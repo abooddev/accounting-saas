@@ -63,7 +63,9 @@ export const invoiceItems = pgTable('invoice_items', {
   invoiceId: uuid('invoice_id').references(() => invoices.id, { onDelete: 'cascade' }).notNull(),
   productId: uuid('product_id'),
   description: varchar('description', { length: 500 }).notNull(),
-  quantity: decimal('quantity', { precision: 20, scale: 6 }).notNull().default('1'),
+  quantity: decimal('quantity', { precision: 20, scale: 6 }).notNull().default('1'), // Total pieces
+  boxQty: decimal('box_qty', { precision: 20, scale: 6 }), // Number of boxes/cartons
+  piecesPerBox: decimal('pieces_per_box', { precision: 20, scale: 6 }), // Pieces per box
   unit: varchar('unit', { length: 20 }).default('piece'),
   unitPrice: decimal('unit_price', { precision: 20, scale: 6 }).notNull(),
   discountPercent: decimal('discount_percent', { precision: 5, scale: 2 }).default('0'),

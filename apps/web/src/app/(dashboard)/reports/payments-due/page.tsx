@@ -14,7 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, AlertTriangle, Clock, CalendarDays, ExternalLink } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Clock, CalendarDays, ExternalLink, Download } from 'lucide-react';
+import { exportPaymentsDueToExcel } from '@/lib/excel';
 
 export default function PaymentsDuePage() {
   const { data: report, isLoading } = usePaymentsDue();
@@ -35,6 +36,15 @@ export default function PaymentsDuePage() {
             </p>
           </div>
         </div>
+        {report && report.totals && (
+          <Button
+            variant="outline"
+            onClick={() => exportPaymentsDueToExcel(report)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export to Excel
+          </Button>
+        )}
       </div>
 
       {isLoading ? (

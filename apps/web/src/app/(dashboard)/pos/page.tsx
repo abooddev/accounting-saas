@@ -1,14 +1,26 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { POSLayout, useProductsStore, useSessionStore, POSProduct, POSSession } from '@accounting/pos-core';
+import { POSLayout, useProductsStore, useSessionStore, useCartStore, POSProduct, POSSession } from '@accounting/pos-core';
 import { useAuthStore } from '@/stores/auth-store';
 import { apiClient } from '@/lib/api/client';
 import { useActiveSession, useOpenSession, useCloseSession, useCreateSale } from '@/hooks/use-pos';
 
+/**
+ * POS Page - Point of Sale Interface
+ *
+ * This page provides a full-featured point of sale interface using the Cedar & Gold theme
+ * (dark mode POS interface). It connects to the API for:
+ * - Opening/closing cashier sessions
+ * - Recording sales transactions
+ * - Fetching products and exchange rates
+ *
+ * The current authenticated user is used as the cashier.
+ */
 export default function POSPage() {
   const { user, tenant } = useAuthStore();
-  const { setProducts, setExchangeRate, exchangeRate } = useProductsStore();
+  const { setProducts } = useProductsStore();
+  const { setExchangeRate, cart: { exchangeRate } } = useCartStore();
   const { setTerminal, setSession, session } = useSessionStore();
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
@@ -173,6 +185,51 @@ export default function POSPage() {
     }
   }, [session, createSaleMutation, exchangeRate]);
 
+  /**
+   * Handle receipt printing
+   * Sends receipt data to the print API endpoint for server-side printing
+   * or generates a printable receipt via the API
+   */
+  const handlePrint = useCallback(async (receiptData: any) => {
+    try {
+      // Send to print API for thermal printer or PDF generation
+      const response = await apiClient.post('/pos/receipts/print', {
+        receiptData,
+        sessionId: session?.id,
+        terminalId: session?.terminalId,
+        storeName: tenant?.name || 'Store',
+      });
+
+      // If the API returns a PDF URL, open it for printing
+      if (response.data.data?.pdfUrl) {
+        window.open(response.data.data.pdfUrl, '_blank');
+      }
+
+      console.log('Receipt printed successfully');
+    } catch (error) {
+      console.error('Failed to print receipt:', error);
+      // Re-throw so POSLayout can handle the error
+      throw error;
+    }
+  }, [session, tenant]);
+
+  /**
+   * Handle cash drawer opening
+   * Sends command to open the cash drawer via API
+   */
+  const handleOpenCashDrawer = useCallback(async () => {
+    try {
+      await apiClient.post('/pos/cash-drawer/open', {
+        sessionId: session?.id,
+        terminalId: session?.terminalId,
+      });
+      console.log('Cash drawer opened');
+    } catch (error) {
+      // Cash drawer opening is optional - log but don't throw
+      console.warn('Cash drawer command failed (may not be connected):', error);
+    }
+  }, [session]);
+
   if (isLoading || sessionLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -198,6 +255,8 @@ export default function POSPage() {
       cashierName={user.name}
       isOnline={isOnline}
       onSaleComplete={handleSaleComplete}
+      onPrint={handlePrint}
+      onOpenCashDrawer={handleOpenCashDrawer}
       onSessionOpen={handleSessionOpen}
       onSessionClose={handleSessionClose}
     />

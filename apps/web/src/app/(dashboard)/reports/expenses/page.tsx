@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
+import { exportExpensesByCategoryToExcel } from '@/lib/excel';
 
 export default function ExpensesPage() {
   const defaultRange = getDateRange('this_month');
@@ -49,6 +50,15 @@ export default function ExpensesPage() {
             </p>
           </div>
         </div>
+        {report && (
+          <Button
+            variant="outline"
+            onClick={() => exportExpensesByCategoryToExcel(report)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export to Excel
+          </Button>
+        )}
       </div>
 
       <DateRangePicker

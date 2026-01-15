@@ -201,6 +201,81 @@ export interface InventoryValueReport {
   }>;
 }
 
+export interface BalanceSheetReport {
+  asOfDate: string;
+  assets: {
+    currentAssets: {
+      cashAndBank: number;
+      accountsReceivable: number;
+      inventory: number;
+      totalCurrentAssets: number;
+    };
+    totalAssets: number;
+  };
+  liabilities: {
+    currentLiabilities: {
+      accountsPayable: number;
+      totalCurrentLiabilities: number;
+    };
+    totalLiabilities: number;
+  };
+  equity: {
+    retainedEarnings: number;
+    totalEquity: number;
+  };
+  isBalanced: boolean;
+  currency: string;
+  detail: {
+    cashAndBankAccounts: Array<{
+      id: string;
+      name: string;
+      nameAr: string | null;
+      type: string;
+      currency: string;
+      balance: number;
+    }>;
+    accountsReceivableDetail: Array<{
+      id: string;
+      name: string;
+      nameAr: string | null;
+      balance: number;
+    }>;
+    accountsPayableDetail: Array<{
+      id: string;
+      name: string;
+      nameAr: string | null;
+      balance: number;
+    }>;
+  };
+}
+
+export interface TrialBalanceReport {
+  asOfDate: string;
+  entries: Array<{
+    accountName: string;
+    accountNameAr: string | null;
+    accountType: 'asset' | 'liability' | 'revenue' | 'expense' | 'equity';
+    category: string;
+    debit: number;
+    credit: number;
+    currency: string;
+  }>;
+  totals: {
+    debit: number;
+    credit: number;
+    difference: number;
+    isBalanced: boolean;
+  };
+  summary: {
+    assets: number;
+    liabilities: number;
+    revenue: number;
+    expenses: number;
+    netIncome: number;
+  };
+  currency: string;
+}
+
 export const DATE_PRESETS = [
   { label: 'Today', value: 'today' },
   { label: 'Yesterday', value: 'yesterday' },

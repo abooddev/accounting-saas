@@ -8,6 +8,8 @@ import type {
   PaymentsDueReport,
   CashFlowReport,
   InventoryValueReport,
+  BalanceSheetReport,
+  TrialBalanceReport,
 } from '@accounting/shared';
 
 export interface DateRangeParams {
@@ -66,6 +68,20 @@ export const reportsApi = {
 
   getLowStock: async (): Promise<InventoryValueReport['lowStock']> => {
     const response = await apiClient.get('/reports/low-stock');
+    return response.data.data;
+  },
+
+  getBalanceSheet: async (asOfDate?: string): Promise<BalanceSheetReport> => {
+    const response = await apiClient.get('/reports/balance-sheet', {
+      params: asOfDate ? { asOfDate } : undefined,
+    });
+    return response.data.data;
+  },
+
+  getTrialBalance: async (asOfDate?: string): Promise<TrialBalanceReport> => {
+    const response = await apiClient.get('/reports/trial-balance', {
+      params: asOfDate ? { asOfDate } : undefined,
+    });
     return response.data.data;
   },
 };

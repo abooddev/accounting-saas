@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, TrendingUp, TrendingDown, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, ArrowDownRight, ArrowUpRight, Download } from 'lucide-react';
+import { exportCashFlowToExcel } from '@/lib/excel';
 
 export default function CashFlowPage() {
   const defaultRange = getDateRange('this_month');
@@ -46,6 +47,15 @@ export default function CashFlowPage() {
             </p>
           </div>
         </div>
+        {report && (
+          <Button
+            variant="outline"
+            onClick={() => exportCashFlowToExcel(report)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export to Excel
+          </Button>
+        )}
       </div>
 
       <DateRangePicker

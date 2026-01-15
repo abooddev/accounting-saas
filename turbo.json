@@ -25,6 +25,26 @@
     "db:studio": {
       "cache": false,
       "persistent": true
+    },
+    "package": {
+      "dependsOn": ["^build"],
+      "outputs": ["out/**"],
+      "cache": false
+    },
+    "package:win": {
+      "dependsOn": ["^build"],
+      "outputs": ["out/**"],
+      "cache": false
+    },
+    "package:mac": {
+      "dependsOn": ["^build"],
+      "outputs": ["out/**"],
+      "cache": false
+    },
+    "package:linux": {
+      "dependsOn": ["^build"],
+      "outputs": ["out/**"],
+      "cache": false
     }
   }
 }

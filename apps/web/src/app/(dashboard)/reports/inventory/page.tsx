@@ -14,7 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, Package, AlertTriangle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Package, AlertTriangle, ExternalLink, Download } from 'lucide-react';
+import { exportInventoryToExcel, exportLowStockToExcel } from '@/lib/excel';
 
 export default function InventoryPage() {
   const { data: report, isLoading } = useInventoryValue();
@@ -38,6 +39,26 @@ export default function InventoryPage() {
             </p>
           </div>
         </div>
+        {report && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => exportInventoryToExcel(report)}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Inventory
+            </Button>
+            {report.lowStock.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => exportLowStockToExcel(report.lowStock)}
+              >
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Export Low Stock
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {isLoading ? (

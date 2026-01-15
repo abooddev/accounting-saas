@@ -26,7 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, History } from 'lucide-react';
+import { ArrowLeft, History, Download, FileText, Loader2 } from 'lucide-react';
+import { exportSupplierStatementToExcel } from '@/lib/excel';
+import { SupplierStatementPDF } from '@/components/pdf';
+import { usePDFDownload } from '@/components/pdf/usePDFDownload';
 
 function SupplierStatementContent() {
   const searchParams = useSearchParams();
@@ -39,6 +42,13 @@ function SupplierStatementContent() {
 
   const { data: contacts } = useContacts({ type: 'supplier' });
   const { data: report, isLoading } = useSupplierStatement(contactId, { startDate, endDate });
+  const { downloadPDF, isGenerating } = usePDFDownload();
+
+  const handleDownloadPDF = async () => {
+    if (!report) return;
+    const filename = `statement-${report.supplier.name}-${startDate}-to-${endDate}.pdf`;
+    await downloadPDF(<SupplierStatementPDF report={report} />, filename);
+  };
 
   const handleDateChange = (start: string, end: string) => {
     setStartDate(start);
@@ -61,14 +71,44 @@ function SupplierStatementContent() {
             </p>
           </div>
         </div>
-        {contactId && (
-          <Link href={`/contacts/${contactId}`}>
-            <Button variant="outline">
-              <History className="h-4 w-4 mr-2" />
-              View Purchase History
-            </Button>
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          {report && (
+            <>
+              <Button
+                variant="outline"
+                onClick={handleDownloadPDF}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export to PDF
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => exportSupplierStatementToExcel(report)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export to Excel
+              </Button>
+            </>
+          )}
+          {contactId && (
+            <Link href={`/contacts/${contactId}`}>
+              <Button variant="outline">
+                <History className="h-4 w-4 mr-2" />
+                View Purchase History
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-end gap-4">

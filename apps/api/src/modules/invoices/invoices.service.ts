@@ -33,6 +33,7 @@ export class InvoicesService {
   async create(tenantId: string, userId: string, data: {
     type: string;
     invoiceNumber?: string;
+    supplierInvoiceNumber?: string;
     contactId?: string;
     date: string;
     dueDate?: string;
@@ -81,7 +82,7 @@ export class InvoicesService {
     const invoiceData: NewInvoice = {
       tenantId,
       type: data.type,
-      invoiceNumber: data.invoiceNumber,
+      invoiceNumber: data.supplierInvoiceNumber || data.invoiceNumber,
       internalNumber,
       contactId: data.contactId,
       date: data.date,
@@ -170,6 +171,7 @@ export class InvoicesService {
 
     return results.map(r => ({
       ...r.invoice,
+      supplierInvoiceNumber: r.invoice.invoiceNumber,
       contact: r.contact?.id ? r.contact : null,
       items: allItems.filter(item => item.invoiceId === r.invoice.id),
     }));
@@ -208,6 +210,7 @@ export class InvoicesService {
 
     return {
       ...result.invoice,
+      supplierInvoiceNumber: result.invoice.invoiceNumber,
       contact: result.contact?.id ? result.contact : null,
       items,
     };
@@ -215,6 +218,7 @@ export class InvoicesService {
 
   async update(tenantId: string, id: string, data: {
     invoiceNumber?: string;
+    supplierInvoiceNumber?: string;
     contactId?: string;
     date?: string;
     dueDate?: string;
@@ -288,7 +292,7 @@ export class InvoicesService {
       await this.db
         .update(invoices)
         .set({
-          invoiceNumber: data.invoiceNumber ?? existing.invoiceNumber,
+          invoiceNumber: data.supplierInvoiceNumber || data.invoiceNumber || existing.invoiceNumber,
           contactId: data.contactId ?? existing.contactId,
           date: data.date ?? existing.date,
           dueDate: data.dueDate ?? existing.dueDate,
@@ -311,7 +315,8 @@ export class InvoicesService {
     } else {
       // Just update non-item fields
       const updateData: Partial<NewInvoice> = { updatedAt: new Date() };
-      if (data.invoiceNumber !== undefined) updateData.invoiceNumber = data.invoiceNumber;
+      if (data.supplierInvoiceNumber !== undefined) updateData.invoiceNumber = data.supplierInvoiceNumber;
+      else if (data.invoiceNumber !== undefined) updateData.invoiceNumber = data.invoiceNumber;
       if (data.contactId !== undefined) updateData.contactId = data.contactId;
       if (data.date !== undefined) updateData.date = data.date;
       if (data.dueDate !== undefined) updateData.dueDate = data.dueDate;

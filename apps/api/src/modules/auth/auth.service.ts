@@ -190,7 +190,7 @@ export class AuthService {
     };
 
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: this.configService.get<string>('jwt.accessExpiry'),
+      expiresIn: 900, // 15 minutes in seconds
     });
 
     const refreshToken = uuidv4();

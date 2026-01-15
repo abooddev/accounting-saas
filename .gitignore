@@ -34,3 +34,7 @@ coverage
 
 # OS
 Thumbs.db
+google-credentials.json
+
+# Uploads
+apps/api/uploads

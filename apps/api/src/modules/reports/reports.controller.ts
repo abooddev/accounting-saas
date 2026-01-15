@@ -18,18 +18,12 @@ export class ReportsController {
     const end = endDate || new Date().toISOString().split('T')[0];
     const start = startDate || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
-    return {
-      success: true,
-      data: await this.reportsService.getProfitLoss(tenantId, start, end),
-    };
+    return this.reportsService.getProfitLoss(tenantId, start, end);
   }
 
   @Get('supplier-balances')
   async getSupplierBalances(@CurrentTenant() tenantId: string) {
-    return {
-      success: true,
-      data: await this.reportsService.getSupplierBalances(tenantId),
-    };
+    return this.reportsService.getSupplierBalances(tenantId);
   }
 
   @Get('supplier-statement/:contactId')
@@ -49,10 +43,7 @@ export class ReportsController {
       throw new NotFoundException('Supplier not found');
     }
 
-    return {
-      success: true,
-      data: result,
-    };
+    return result;
   }
 
   @Get('supplier-history/:contactId')
@@ -71,10 +62,7 @@ export class ReportsController {
       throw new NotFoundException('Supplier not found');
     }
 
-    return {
-      success: true,
-      data: result,
-    };
+    return result;
   }
 
   @Get('expenses-by-category')
@@ -87,18 +75,12 @@ export class ReportsController {
     const end = endDate || new Date().toISOString().split('T')[0];
     const start = startDate || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
-    return {
-      success: true,
-      data: await this.reportsService.getExpensesByCategory(tenantId, start, end),
-    };
+    return this.reportsService.getExpensesByCategory(tenantId, start, end);
   }
 
   @Get('payments-due')
   async getPaymentsDue(@CurrentTenant() tenantId: string) {
-    return {
-      success: true,
-      data: await this.reportsService.getPaymentsDue(tenantId),
-    };
+    return this.reportsService.getPaymentsDue(tenantId);
   }
 
   @Get('cash-flow')
@@ -111,26 +93,37 @@ export class ReportsController {
     const end = endDate || new Date().toISOString().split('T')[0];
     const start = startDate || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
-    return {
-      success: true,
-      data: await this.reportsService.getCashFlow(tenantId, start, end),
-    };
+    return this.reportsService.getCashFlow(tenantId, start, end);
   }
 
   @Get('inventory-value')
   async getInventoryValue(@CurrentTenant() tenantId: string) {
-    return {
-      success: true,
-      data: await this.reportsService.getInventoryValue(tenantId),
-    };
+    return this.reportsService.getInventoryValue(tenantId);
   }
 
   @Get('low-stock')
   async getLowStock(@CurrentTenant() tenantId: string) {
     const result = await this.reportsService.getInventoryValue(tenantId);
-    return {
-      success: true,
-      data: result.lowStock,
-    };
+    return result.lowStock;
+  }
+
+  @Get('balance-sheet')
+  async getBalanceSheet(
+    @CurrentTenant() tenantId: string,
+    @Query('asOfDate') asOfDate?: string,
+  ) {
+    // Default to today if not provided
+    const date = asOfDate || new Date().toISOString().split('T')[0];
+    return this.reportsService.getBalanceSheet(tenantId, date);
+  }
+
+  @Get('trial-balance')
+  async getTrialBalance(
+    @CurrentTenant() tenantId: string,
+    @Query('asOfDate') asOfDate?: string,
+  ) {
+    // Default to today if not provided
+    const date = asOfDate || new Date().toISOString().split('T')[0];
+    return this.reportsService.getTrialBalance(tenantId, date);
   }
 }

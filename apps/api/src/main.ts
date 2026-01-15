@@ -10,7 +10,11 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: process.env.WEB_URL || 'http://localhost:3000',
+    origin: [
+      process.env.WEB_URL || 'http://localhost:3000',
+      'http://localhost:5174', // Electron POS dev
+      'http://localhost:5175', // Electron POS fallback
+    ],
     credentials: true,
   });
 

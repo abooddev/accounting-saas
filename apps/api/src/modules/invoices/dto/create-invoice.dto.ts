@@ -47,6 +47,10 @@ export class CreateInvoiceDto {
 
   @IsOptional()
   @IsString()
+  supplierInvoiceNumber?: string;
+
+  @IsOptional()
+  @IsString()
   contactId?: string;
 
   @IsString()

@@ -668,6 +668,432 @@ export class ReportsService {
     };
   }
 
+  async getBalanceSheet(tenantId: string, asOfDate: string) {
+    // ASSETS
+    // 1. Cash and Bank (from moneyAccounts)
+    const cashAndBankAccounts = await this.db
+      .select({
+        id: moneyAccounts.id,
+        name: moneyAccounts.name,
+        nameAr: moneyAccounts.nameAr,
+        type: moneyAccounts.type,
+        currency: moneyAccounts.currency,
+        balance: moneyAccounts.currentBalance,
+      })
+      .from(moneyAccounts)
+      .where(
+        and(
+          eq(moneyAccounts.tenantId, tenantId),
+          eq(moneyAccounts.isActive, true),
+          isNull(moneyAccounts.deletedAt),
+        ),
+      );
+
+    // Convert all balances to USD for totaling (LBP accounts stay separate for detail)
+    const cashAndBankUsd = cashAndBankAccounts
+      .filter(acc => acc.currency === 'USD')
+      .reduce((sum, acc) => sum + parseFloat(acc.balance || '0'), 0);
+
+    // 2. Accounts Receivable (customers with positive balances - they owe us)
+    const customersReceivable = await this.db
+      .select({
+        id: contacts.id,
+        name: contacts.name,
+        nameAr: contacts.nameAr,
+        balanceUsd: contacts.balanceUsd,
+      })
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.tenantId, tenantId),
+          inArray(contacts.type, ['customer', 'both']),
+          sql`${contacts.balanceUsd}::numeric > 0`,
+          isNull(contacts.deletedAt),
+        ),
+      );
+
+    const accountsReceivable = customersReceivable.reduce(
+      (sum, c) => sum + parseFloat(c.balanceUsd || '0'),
+      0
+    );
+
+    // 3. Inventory (product stock x cost price)
+    const [inventoryResult] = await this.db
+      .select({
+        total: sql<string>`COALESCE(SUM(${products.currentStock}::numeric * COALESCE(${products.costPrice}::numeric, 0)), 0)`,
+      })
+      .from(products)
+      .where(
+        and(
+          eq(products.tenantId, tenantId),
+          eq(products.trackStock, true),
+          eq(products.isActive, true),
+          isNull(products.deletedAt),
+        ),
+      );
+
+    const inventory = parseFloat(inventoryResult?.total || '0');
+
+    // Calculate total current assets and total assets
+    const totalCurrentAssets = cashAndBankUsd + accountsReceivable + inventory;
+    const totalAssets = totalCurrentAssets;
+
+    // LIABILITIES
+    // Accounts Payable (suppliers with positive balances - we owe them)
+    const suppliersPayable = await this.db
+      .select({
+        id: contacts.id,
+        name: contacts.name,
+        nameAr: contacts.nameAr,
+        balanceUsd: contacts.balanceUsd,
+      })
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.tenantId, tenantId),
+          inArray(contacts.type, ['supplier', 'both']),
+          sql`${contacts.balanceUsd}::numeric > 0`,
+          isNull(contacts.deletedAt),
+        ),
+      );
+
+    const accountsPayable = suppliersPayable.reduce(
+      (sum, s) => sum + parseFloat(s.balanceUsd || '0'),
+      0
+    );
+
+    const totalCurrentLiabilities = accountsPayable;
+    const totalLiabilities = totalCurrentLiabilities;
+
+    // EQUITY
+    // Retained Earnings = Assets - Liabilities (accounting equation)
+    const retainedEarnings = totalAssets - totalLiabilities;
+    const totalEquity = retainedEarnings;
+
+    // Verify balance: Assets = Liabilities + Equity
+    const isBalanced = Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 0.01;
+
+    return {
+      asOfDate,
+      assets: {
+        currentAssets: {
+          cashAndBank: cashAndBankUsd,
+          accountsReceivable,
+          inventory,
+          totalCurrentAssets,
+        },
+        totalAssets,
+      },
+      liabilities: {
+        currentLiabilities: {
+          accountsPayable,
+          totalCurrentLiabilities,
+        },
+        totalLiabilities,
+      },
+      equity: {
+        retainedEarnings,
+        totalEquity,
+      },
+      isBalanced,
+      currency: 'USD',
+      detail: {
+        cashAndBankAccounts: cashAndBankAccounts.map(acc => ({
+          id: acc.id,
+          name: acc.name,
+          nameAr: acc.nameAr,
+          type: acc.type,
+          currency: acc.currency,
+          balance: parseFloat(acc.balance || '0'),
+        })),
+        accountsReceivableDetail: customersReceivable.map(c => ({
+          id: c.id,
+          name: c.name,
+          nameAr: c.nameAr,
+          balance: parseFloat(c.balanceUsd || '0'),
+        })),
+        accountsPayableDetail: suppliersPayable.map(s => ({
+          id: s.id,
+          name: s.name,
+          nameAr: s.nameAr,
+          balance: parseFloat(s.balanceUsd || '0'),
+        })),
+      },
+    };
+  }
+
+  async getTrialBalance(tenantId: string, asOfDate: string) {
+    // Get all money accounts (cash/bank) - these are assets with debit balances
+    const accounts = await this.db
+      .select({
+        id: moneyAccounts.id,
+        name: moneyAccounts.name,
+        nameAr: moneyAccounts.nameAr,
+        type: moneyAccounts.type,
+        currency: moneyAccounts.currency,
+        currentBalance: moneyAccounts.currentBalance,
+      })
+      .from(moneyAccounts)
+      .where(
+        and(
+          eq(moneyAccounts.tenantId, tenantId),
+          eq(moneyAccounts.isActive, true),
+          isNull(moneyAccounts.deletedAt),
+        ),
+      );
+
+    // Get supplier contacts (Accounts Payable - credit balances/liabilities)
+    const suppliers = await this.db
+      .select({
+        id: contacts.id,
+        name: contacts.name,
+        nameAr: contacts.nameAr,
+        balanceUsd: contacts.balanceUsd,
+        balanceLbp: contacts.balanceLbp,
+      })
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.tenantId, tenantId),
+          inArray(contacts.type, ['supplier', 'both']),
+          isNull(contacts.deletedAt),
+        ),
+      );
+
+    // Get customer contacts (Accounts Receivable - debit balances/assets)
+    const customers = await this.db
+      .select({
+        id: contacts.id,
+        name: contacts.name,
+        nameAr: contacts.nameAr,
+        balanceUsd: contacts.balanceUsd,
+        balanceLbp: contacts.balanceLbp,
+      })
+      .from(contacts)
+      .where(
+        and(
+          eq(contacts.tenantId, tenantId),
+          inArray(contacts.type, ['customer', 'both']),
+          isNull(contacts.deletedAt),
+        ),
+      );
+
+    // Get revenue from sales invoices up to asOfDate
+    const [salesResult] = await this.db
+      .select({
+        total: sql<string>`COALESCE(SUM(${invoices.total}::numeric), 0)`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.tenantId, tenantId),
+          eq(invoices.type, 'sale'),
+          inArray(invoices.status, ['pending', 'partial', 'paid']),
+          lte(invoices.date, asOfDate),
+          isNull(invoices.deletedAt),
+        ),
+      );
+
+    // Get purchases (Cost of Goods Sold) up to asOfDate
+    const [purchasesResult] = await this.db
+      .select({
+        total: sql<string>`COALESCE(SUM(${invoices.total}::numeric), 0)`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.tenantId, tenantId),
+          eq(invoices.type, 'purchase'),
+          inArray(invoices.status, ['pending', 'partial', 'paid']),
+          lte(invoices.date, asOfDate),
+          isNull(invoices.deletedAt),
+        ),
+      );
+
+    // Get expenses by category up to asOfDate
+    const expensesResult = await this.db
+      .select({
+        category: invoices.expenseCategory,
+        total: sql<string>`COALESCE(SUM(${invoices.total}::numeric), 0)`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.tenantId, tenantId),
+          eq(invoices.type, 'expense'),
+          inArray(invoices.status, ['pending', 'partial', 'paid']),
+          lte(invoices.date, asOfDate),
+          isNull(invoices.deletedAt),
+        ),
+      )
+      .groupBy(invoices.expenseCategory);
+
+    // Build trial balance entries
+    const entries: Array<{
+      accountName: string;
+      accountNameAr: string | null;
+      accountType: 'asset' | 'liability' | 'revenue' | 'expense' | 'equity';
+      category: string;
+      debit: number;
+      credit: number;
+      currency: string;
+    }> = [];
+
+    // Add cash/bank accounts as assets (debit balances)
+    accounts.forEach(acc => {
+      const balance = parseFloat(acc.currentBalance || '0');
+      if (balance !== 0) {
+        entries.push({
+          accountName: acc.name,
+          accountNameAr: acc.nameAr || null,
+          accountType: 'asset',
+          category: acc.type === 'cash' ? 'Cash' : 'Bank',
+          debit: balance > 0 ? balance : 0,
+          credit: balance < 0 ? Math.abs(balance) : 0,
+          currency: acc.currency,
+        });
+      }
+    });
+
+    // Add accounts receivable (customer balances) as assets
+    const totalArUsd = customers.reduce((sum, c) => sum + parseFloat(c.balanceUsd || '0'), 0);
+    const totalArLbp = customers.reduce((sum, c) => sum + parseFloat(c.balanceLbp || '0'), 0);
+
+    if (totalArUsd !== 0) {
+      entries.push({
+        accountName: 'Accounts Receivable',
+        accountNameAr: 'الذمم المدينة',
+        accountType: 'asset',
+        category: 'Receivables',
+        debit: totalArUsd > 0 ? totalArUsd : 0,
+        credit: totalArUsd < 0 ? Math.abs(totalArUsd) : 0,
+        currency: 'USD',
+      });
+    }
+    if (totalArLbp !== 0) {
+      entries.push({
+        accountName: 'Accounts Receivable (LBP)',
+        accountNameAr: 'الذمم المدينة (ل.ل)',
+        accountType: 'asset',
+        category: 'Receivables',
+        debit: totalArLbp > 0 ? totalArLbp : 0,
+        credit: totalArLbp < 0 ? Math.abs(totalArLbp) : 0,
+        currency: 'LBP',
+      });
+    }
+
+    // Add accounts payable (supplier balances) as liabilities
+    const totalApUsd = suppliers.reduce((sum, s) => sum + parseFloat(s.balanceUsd || '0'), 0);
+    const totalApLbp = suppliers.reduce((sum, s) => sum + parseFloat(s.balanceLbp || '0'), 0);
+
+    if (totalApUsd !== 0) {
+      entries.push({
+        accountName: 'Accounts Payable',
+        accountNameAr: 'الذمم الدائنة',
+        accountType: 'liability',
+        category: 'Payables',
+        debit: totalApUsd < 0 ? Math.abs(totalApUsd) : 0,
+        credit: totalApUsd > 0 ? totalApUsd : 0,
+        currency: 'USD',
+      });
+    }
+    if (totalApLbp !== 0) {
+      entries.push({
+        accountName: 'Accounts Payable (LBP)',
+        accountNameAr: 'الذمم الدائنة (ل.ل)',
+        accountType: 'liability',
+        category: 'Payables',
+        debit: totalApLbp < 0 ? Math.abs(totalApLbp) : 0,
+        credit: totalApLbp > 0 ? totalApLbp : 0,
+        currency: 'LBP',
+      });
+    }
+
+    // Add revenue (credit balance)
+    const salesTotal = parseFloat(salesResult?.total || '0');
+    if (salesTotal !== 0) {
+      entries.push({
+        accountName: 'Sales Revenue',
+        accountNameAr: 'إيرادات المبيعات',
+        accountType: 'revenue',
+        category: 'Revenue',
+        debit: 0,
+        credit: salesTotal,
+        currency: 'USD',
+      });
+    }
+
+    // Add cost of goods sold (debit balance)
+    const purchasesTotal = parseFloat(purchasesResult?.total || '0');
+    if (purchasesTotal !== 0) {
+      entries.push({
+        accountName: 'Cost of Goods Sold',
+        accountNameAr: 'تكلفة البضاعة المباعة',
+        accountType: 'expense',
+        category: 'COGS',
+        debit: purchasesTotal,
+        credit: 0,
+        currency: 'USD',
+      });
+    }
+
+    // Add expenses by category (debit balances)
+    expensesResult.forEach(exp => {
+      const amount = parseFloat(exp.total);
+      if (amount !== 0) {
+        const categoryInfo = EXPENSE_CATEGORIES.find(c => c.value === exp.category);
+        entries.push({
+          accountName: categoryInfo?.label || exp.category || 'Other Expenses',
+          accountNameAr: categoryInfo?.labelAr || null,
+          accountType: 'expense',
+          category: 'Operating Expenses',
+          debit: amount,
+          credit: 0,
+          currency: 'USD',
+        });
+      }
+    });
+
+    // Calculate totals
+    const totalDebit = entries.reduce((sum, e) => sum + e.debit, 0);
+    const totalCredit = entries.reduce((sum, e) => sum + e.credit, 0);
+    const difference = Math.abs(totalDebit - totalCredit);
+    const isBalanced = difference < 0.01; // Allow small rounding differences
+
+    // Group by account type for summary
+    const assetTotal = entries
+      .filter(e => e.accountType === 'asset')
+      .reduce((sum, e) => sum + e.debit - e.credit, 0);
+    const liabilityTotal = entries
+      .filter(e => e.accountType === 'liability')
+      .reduce((sum, e) => sum + e.credit - e.debit, 0);
+    const revenueTotal = entries
+      .filter(e => e.accountType === 'revenue')
+      .reduce((sum, e) => sum + e.credit - e.debit, 0);
+    const expenseTotal = entries
+      .filter(e => e.accountType === 'expense')
+      .reduce((sum, e) => sum + e.debit - e.credit, 0);
+
+    return {
+      asOfDate,
+      entries,
+      totals: {
+        debit: totalDebit,
+        credit: totalCredit,
+        difference,
+        isBalanced,
+      },
+      summary: {
+        assets: assetTotal,
+        liabilities: liabilityTotal,
+        revenue: revenueTotal,
+        expenses: expenseTotal,
+        netIncome: revenueTotal - expenseTotal,
+      },
+      currency: 'USD',
+    };
+  }
+
   async getSupplierHistory(tenantId: string, contactId: string, months: number = 12) {
     const endDate = new Date();
     const startDate = new Date();

@@ -1,4 +1,14 @@
 import React, { useState, useCallback } from 'react';
+import {
+  TreePine,
+  Wifi,
+  WifiOff,
+  Clock,
+  Barcode,
+  Search,
+  Trash2,
+  CreditCard,
+} from 'lucide-react';
 import { useCartStore } from '../stores/cart-store';
 import { useSessionStore } from '../stores/session-store';
 import { useProductsStore } from '../stores/products-store';
@@ -156,32 +166,58 @@ export function POSLayout({
   );
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      <header className="bg-white border-b px-4 py-2 flex items-center justify-between">
+    <div className="h-screen flex flex-col" style={{ background: 'hsl(220 15% 8%)' }}>
+      {/* Premium Header */}
+      <header className="pos-gradient-cedar px-6 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold">POS</h1>
-          {session && (
-            <span className="text-sm text-gray-600">
-              {session.terminalCode} | {session.cashierName}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ background: 'hsl(43 45% 56%)', boxShadow: 'var(--shadow-gold)' }}
+            >
+              <TreePine className="w-6 h-6" style={{ color: 'hsl(160 47% 20%)' }} />
+            </div>
+            <div>
+              <h1 className="pos-header-title text-white text-xl">Point of Sale</h1>
+              {session && (
+                <p className="text-sm text-white/60">
+                  {session.terminalCode} | {session.cashierName}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
-          <span className="text-sm text-gray-600">{isOnline ? 'Online' : 'Offline'}</span>
+        <div className="flex items-center gap-6">
+          {/* Status Indicator */}
+          <div className="flex items-center gap-2">
+            {isOnline ? (
+              <>
+                <Wifi className="w-4 h-4" style={{ color: 'hsl(150 22% 45%)' }} />
+                <span className="text-sm" style={{ color: 'hsl(150 22% 45%)' }}>Online</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-4 h-4" style={{ color: 'hsl(15 56% 50%)' }} />
+                <span className="text-sm" style={{ color: 'hsl(15 56% 50%)' }}>Offline</span>
+              </>
+            )}
+          </div>
 
+          {/* Session Button */}
           <button
             onClick={() => setShowSession(true)}
-            className="px-3 py-1 text-sm border rounded hover:bg-gray-50"
+            className="pos-button-secondary flex items-center gap-2"
           >
+            <Clock className="w-4 h-4" />
             {session?.status === 'open' ? 'Close Shift' : 'Open Shift'}
           </button>
         </div>
       </header>
 
       <main className="flex-1 flex overflow-hidden">
-        <div className="flex-1 flex flex-col p-4">
+        {/* Left Panel - Scan Area */}
+        <div className="flex-1 flex flex-col p-6">
           <ScanInput
             onSubmit={handleBarcodeScan}
             disabled={!session || session.status !== 'open'}
@@ -189,28 +225,52 @@ export function POSLayout({
             autoFocus
           />
 
-          <div className="mt-4 text-center text-gray-500">
-            <p className="text-lg">Scan product barcode</p>
-            <p className="text-sm mt-2">Or type PLU code and press Enter</p>
+          {/* Scan Instructions */}
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div
+              className="w-24 h-24 rounded-2xl flex items-center justify-center mb-6 pos-animate-fade-in"
+              style={{ background: 'hsl(220 14% 12%)', border: '2px dashed hsl(220 12% 25%)' }}
+            >
+              <Barcode className="w-12 h-12" style={{ color: 'hsl(43 45% 56%)' }} />
+            </div>
+            <p className="text-xl font-medium" style={{ color: 'hsl(220 10% 92%)' }}>
+              Scan product barcode
+            </p>
+            <p className="text-sm mt-2" style={{ color: 'hsl(220 10% 55%)' }}>
+              Or type PLU code and press Enter
+            </p>
           </div>
 
-          <div className="mt-auto text-sm text-gray-400">
-            <p>
-              <kbd className="px-1 border rounded">F2</kbd> Search Product
-            </p>
-            <p>
-              <kbd className="px-1 border rounded">F8</kbd> Void Last Item
-            </p>
-            <p>
-              <kbd className="px-1 border rounded">F12</kbd> Pay
-            </p>
+          {/* Keyboard Shortcuts */}
+          <div className="space-y-2 text-sm" style={{ color: 'hsl(220 10% 45%)' }}>
+            <div className="flex items-center gap-3">
+              <kbd className="pos-card px-2 py-1 text-xs font-mono" style={{ minWidth: '2.5rem', textAlign: 'center' }}>
+                <Search className="w-3 h-3 inline" /> F2
+              </kbd>
+              <span>Search Product</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="pos-card px-2 py-1 text-xs font-mono" style={{ minWidth: '2.5rem', textAlign: 'center' }}>
+                <Trash2 className="w-3 h-3 inline" /> F8
+              </kbd>
+              <span>Void Last Item</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="pos-card px-2 py-1 text-xs font-mono" style={{ minWidth: '2.5rem', textAlign: 'center' }}>
+                <CreditCard className="w-3 h-3 inline" /> F12
+              </kbd>
+              <span>Pay</span>
+            </div>
           </div>
         </div>
 
-        <div className="w-96 bg-white border-l flex flex-col">
+        {/* Right Panel - Cart */}
+        <div className="w-96 pos-card flex flex-col m-4 ml-0 overflow-hidden" style={{ borderRadius: '1rem' }}>
           <CartPanel />
 
-          <div className="border-t p-4">
+          <div className="pos-divider" />
+
+          <div className="p-5">
             <TotalDisplay
               subtotal={cart.subtotal}
               discount={cart.discountAmount}
@@ -223,9 +283,9 @@ export function POSLayout({
             <button
               onClick={() => setShowPayment(true)}
               disabled={cart.items.length === 0 || !session || session.status !== 'open'}
-              className="w-full mt-4 py-4 bg-green-600 text-white text-xl font-bold rounded-lg
-                         hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="pos-button-gold w-full mt-5 py-4 text-xl flex items-center justify-center gap-3"
             >
+              <CreditCard className="w-6 h-6" />
               PAY ${cart.total.toFixed(2)}
             </button>
           </div>

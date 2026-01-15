@@ -16,9 +16,9 @@ import { AccountsModule } from '../accounts/accounts.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret'),
+        secret: configService.get<string>('jwt.secret') || 'default-secret-change-in-production',
         signOptions: {
-          expiresIn: configService.get<string>('jwt.accessExpiry'),
+          expiresIn: 900, // 15 minutes in seconds
         },
       }),
     }),

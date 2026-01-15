@@ -13,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, FileText, ExternalLink } from 'lucide-react';
+import { ArrowLeft, FileText, ExternalLink, Download } from 'lucide-react';
+import { exportSupplierBalancesToExcel } from '@/lib/excel';
 
 export default function SupplierBalancesPage() {
   const { data: report, isLoading } = useSupplierBalances();
@@ -34,6 +35,15 @@ export default function SupplierBalancesPage() {
             </p>
           </div>
         </div>
+        {report && (
+          <Button
+            variant="outline"
+            onClick={() => exportSupplierBalancesToExcel(report)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export to Excel
+          </Button>
+        )}
       </div>
 
       {isLoading ? (

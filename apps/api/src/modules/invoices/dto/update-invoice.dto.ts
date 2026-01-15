@@ -17,6 +17,10 @@ export class UpdateInvoiceDto {
 
   @IsOptional()
   @IsString()
+  supplierInvoiceNumber?: string;
+
+  @IsOptional()
+  @IsString()
   contactId?: string;
 
   @IsOptional()

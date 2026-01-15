@@ -1,6 +1,8 @@
 import { pgTable, uuid, varchar, decimal, boolean, timestamp, index, unique } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 import { tenants } from './tenants';
 import { categories } from './categories';
+import { contacts } from './contacts';
 
 export const products = pgTable('products', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -32,3 +34,38 @@ export const products = pgTable('products', {
 
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
+
+// Product aliases for OCR matching
+export const productAliases = pgTable('product_aliases', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tenantId: uuid('tenant_id').references(() => tenants.id).notNull(),
+  productId: uuid('product_id').references(() => products.id, { onDelete: 'cascade' }).notNull(),
+  supplierId: uuid('supplier_id').references(() => contacts.id), // Optional: supplier-specific alias
+  alias: varchar('alias', { length: 500 }).notNull(), // The OCR text or alternative name
+  normalizedAlias: varchar('normalized_alias', { length: 500 }), // Lowercase, trimmed for matching
+  source: varchar('source', { length: 50 }).default('manual'), // 'ocr', 'manual', 'import'
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  tenantProductIdx: index('product_aliases_tenant_product_idx').on(table.tenantId, table.productId),
+  tenantSupplierIdx: index('product_aliases_tenant_supplier_idx').on(table.tenantId, table.supplierId),
+  tenantAliasIdx: index('product_aliases_tenant_alias_idx').on(table.tenantId, table.normalizedAlias),
+  uniqueAliasPerTenantSupplier: unique('product_aliases_tenant_supplier_alias_unique').on(table.tenantId, table.supplierId, table.normalizedAlias),
+}));
+
+export const productAliasesRelations = relations(productAliases, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [productAliases.tenantId],
+    references: [tenants.id],
+  }),
+  product: one(products, {
+    fields: [productAliases.productId],
+    references: [products.id],
+  }),
+  supplier: one(contacts, {
+    fields: [productAliases.supplierId],
+    references: [contacts.id],
+  }),
+}));
+
+export type ProductAlias = typeof productAliases.$inferSelect;
+export type NewProductAlias = typeof productAliases.$inferInsert;

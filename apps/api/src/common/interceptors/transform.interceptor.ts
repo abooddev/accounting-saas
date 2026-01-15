@@ -21,10 +21,16 @@ export class TransformInterceptor<T>
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
     return next.handle().pipe(
-      map((data) => ({
-        success: true as const,
-        data,
-      })),
+      map((data) => {
+        // Don't double-wrap if already wrapped
+        if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+          return data;
+        }
+        return {
+          success: true as const,
+          data,
+        };
+      }),
     );
   }
 }

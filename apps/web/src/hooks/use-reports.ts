@@ -76,3 +76,19 @@ export function useLowStock() {
     staleTime: 60 * 1000, // 1 minute
   });
 }
+
+export function useBalanceSheet(asOfDate?: string) {
+  return useQuery({
+    queryKey: ['reports', 'balance-sheet', asOfDate],
+    queryFn: () => reportsApi.getBalanceSheet(asOfDate),
+    staleTime: 60 * 1000, // 1 minute
+  });
+}
+
+export function useTrialBalance(asOfDate?: string) {
+  return useQuery({
+    queryKey: ['reports', 'trial-balance', asOfDate],
+    queryFn: () => reportsApi.getTrialBalance(asOfDate),
+    staleTime: 60 * 1000, // 1 minute
+  });
+}

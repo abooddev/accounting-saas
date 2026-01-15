@@ -1,0 +1,382 @@
+@import "tailwindcss";
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+
+/* Cedar & Gold Theme - POS Dark Mode */
+:root {
+  --cedar: 160 47% 20%;
+  --cedar-light: 158 37% 32%;
+  --sage: 150 22% 45%;
+  --gold: 43 45% 56%;
+  --gold-light: 43 50% 65%;
+  --terracotta: 15 56% 50%;
+
+  /* POS Dark Theme */
+  --pos-bg: 220 15% 8%;
+  --pos-card: 220 14% 12%;
+  --pos-card-hover: 220 14% 16%;
+  --pos-border: 220 12% 20%;
+  --pos-text: 220 10% 92%;
+  --pos-text-muted: 220 10% 55%;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-gold: 0 4px 20px rgba(201, 169, 98, 0.25);
+  --shadow-cedar: 0 4px 20px rgba(27, 77, 62, 0.35);
+}
+
+/* Root element should take full height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: hsl(var(--pos-bg));
+  color: hsl(var(--pos-text));
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Disable text selection for UI elements (POS behavior) */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Hide scrollbar for cart panel */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar with Cedar & Gold theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--pos-card));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--pos-border));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--gold) / 0.5);
+}
+
+/* POS Button Base */
+.pos-button {
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.pos-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--pos-bg)), 0 0 0 4px hsl(var(--gold));
+}
+
+.pos-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pos-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Cedar Primary Button */
+.pos-button-primary {
+  color: white;
+  background: linear-gradient(135deg, hsl(var(--cedar)) 0%, hsl(var(--cedar-light)) 100%);
+  box-shadow: var(--shadow-cedar);
+}
+
+.pos-button-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(27, 77, 62, 0.45);
+}
+
+/* Sage Success Button */
+.pos-button-success {
+  color: white;
+  background: hsl(var(--sage));
+  box-shadow: 0 4px 14px rgba(91, 138, 114, 0.3);
+}
+
+.pos-button-success:hover:not(:disabled) {
+  background: hsl(150 22% 40%);
+  transform: translateY(-1px);
+}
+
+/* Terracotta Danger Button */
+.pos-button-danger {
+  color: white;
+  background: hsl(var(--terracotta));
+  box-shadow: 0 4px 14px rgba(199, 91, 57, 0.3);
+}
+
+.pos-button-danger:hover:not(:disabled) {
+  background: hsl(15 56% 45%);
+  transform: translateY(-1px);
+}
+
+/* Gold Secondary Button */
+.pos-button-secondary {
+  background: hsl(var(--pos-card-hover));
+  color: hsl(var(--pos-text));
+  border: 1px solid hsl(var(--pos-border));
+}
+
+.pos-button-secondary:hover:not(:disabled) {
+  background: hsl(var(--gold) / 0.15);
+  border-color: hsl(var(--gold) / 0.3);
+  color: hsl(var(--gold));
+}
+
+/* Gold Action Button (for checkout, pay) */
+.pos-button-gold {
+  background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+  color: hsl(220 15% 12%);
+  font-weight: 700;
+  box-shadow: var(--shadow-gold);
+}
+
+.pos-button-gold:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(201, 169, 98, 0.4);
+}
+
+/* Numpad styling */
+.numpad-button {
+  width: 4rem;
+  height: 4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  transition: all 0.15s;
+  background: hsl(var(--pos-card));
+  color: hsl(var(--pos-text));
+  border: 1px solid hsl(var(--pos-border));
+}
+
+.numpad-button:hover {
+  background: hsl(var(--pos-card-hover));
+  border-color: hsl(var(--gold) / 0.3);
+}
+
+.numpad-button:active {
+  transform: scale(0.95);
+  background: hsl(var(--gold) / 0.2);
+}
+
+/* POS Card */
+.pos-card {
+  background: hsl(var(--pos-card));
+  border: 1px solid hsl(var(--pos-border));
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.pos-card-hover:hover {
+  background: hsl(var(--pos-card-hover));
+  border-color: hsl(var(--gold) / 0.3);
+}
+
+/* Product Grid Item */
+.pos-product-item {
+  background: hsl(var(--pos-card));
+  border: 1px solid hsl(var(--pos-border));
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pos-product-item:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--gold) / 0.5);
+  box-shadow: var(--shadow-gold);
+}
+
+.pos-product-item:active {
+  transform: scale(0.98);
+}
+
+/* Cart Item */
+.pos-cart-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  background: hsl(var(--pos-card));
+  border: 1px solid transparent;
+}
+
+.pos-cart-item:hover {
+  background: hsl(var(--pos-card-hover));
+  border-color: hsl(var(--pos-border));
+}
+
+/* Category Tab */
+.pos-category-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: hsl(var(--pos-text-muted));
+  background: transparent;
+}
+
+.pos-category-tab:hover {
+  color: hsl(var(--pos-text));
+  background: hsl(var(--pos-card));
+}
+
+.pos-category-tab.active {
+  color: hsl(var(--cedar));
+  background: hsl(var(--gold) / 0.2);
+}
+
+/* Search Input */
+.pos-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  background: hsl(var(--pos-card));
+  border: 2px solid hsl(var(--pos-border));
+  color: hsl(var(--pos-text));
+}
+
+.pos-search-input::placeholder {
+  color: hsl(var(--pos-text-muted));
+}
+
+.pos-search-input:focus {
+  outline: none;
+  border-color: hsl(var(--gold));
+  box-shadow: 0 0 0 3px hsl(var(--gold) / 0.15);
+}
+
+/* Status Badges */
+.pos-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pos-badge-success {
+  background: hsl(var(--sage) / 0.2);
+  color: hsl(var(--sage));
+}
+
+.pos-badge-warning {
+  background: hsl(var(--gold) / 0.2);
+  color: hsl(var(--gold));
+}
+
+.pos-badge-danger {
+  background: hsl(var(--terracotta) / 0.2);
+  color: hsl(var(--terracotta));
+}
+
+/* Divider */
+.pos-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    hsl(var(--pos-border)),
+    transparent
+  );
+}
+
+/* Header Title */
+.pos-header-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 600;
+}
+
+/* Gradient Backgrounds */
+.pos-gradient-cedar {
+  background: linear-gradient(135deg, hsl(var(--cedar)) 0%, hsl(var(--cedar-light)) 100%);
+}
+
+.pos-gradient-gold {
+  background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+}
+
+/* Animation utilities */
+@keyframes pos-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pos-slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pos-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.pos-animate-fade-in {
+  animation: pos-fade-in 0.2s ease-out;
+}
+
+.pos-animate-slide-up {
+  animation: pos-slide-up 0.25s ease-out;
+}
+
+.pos-animate-scale-in {
+  animation: pos-scale-in 0.2s ease-out;
+}
+
+/* Stagger delays for product grid */
+.pos-stagger-1 { animation-delay: 25ms; }
+.pos-stagger-2 { animation-delay: 50ms; }
+.pos-stagger-3 { animation-delay: 75ms; }
+.pos-stagger-4 { animation-delay: 100ms; }
+
+/* Print receipt preview styling */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .receipt-preview, .receipt-preview * {
+    visibility: visible;
+  }
+
+  .receipt-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm; /* Standard thermal receipt width */
+    background: white !important;
+    color: black !important;
+  }
+}

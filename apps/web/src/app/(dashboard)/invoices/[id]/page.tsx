@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useInvoice, useConfirmInvoice, useCancelInvoice } from '@/hooks/use-invoices';
@@ -19,15 +20,24 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle, XCircle, CreditCard } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, CreditCard, Download, Loader2 } from 'lucide-react';
 import { formatMoney, INVOICE_STATUSES } from '@accounting/shared';
+import { InvoicePDF } from '@/components/pdf';
+import { usePDFDownload } from '@/components/pdf/usePDFDownload';
 
-export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const { data: invoice, isLoading } = useInvoice(id);
   const confirmMutation = useConfirmInvoice();
   const cancelMutation = useCancelInvoice();
+  const { downloadPDF, isGenerating } = usePDFDownload();
+
+  const handleDownloadPDF = async () => {
+    if (!invoice) return;
+    const filename = `invoice-${invoice.internalNumber}.pdf`;
+    await downloadPDF(<InvoicePDF invoice={invoice} />, filename);
+  };
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-64">Loading...</div>;
@@ -79,6 +89,19 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         </div>
 
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleDownloadPDF} disabled={isGenerating}>
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </>
+            )}
+          </Button>
           {invoice.status === 'draft' && (
             <Button onClick={handleConfirm} disabled={confirmMutation.isPending}>
               <CheckCircle className="h-4 w-4 mr-2" />
